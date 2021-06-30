@@ -17,6 +17,8 @@ bool firstMouseMovement = true;
 float lastX = 400, lastY = 300;
 float yaw = -90, pitch = 0;
 
+glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+
 void MouseMove(float xPos, float yPos) {
   if (firstMouseMovement) {
     lastX = xPos;
@@ -64,62 +66,86 @@ int main() {
   }
 
   Shader myShader("res/shaders/e4.vs", "res/shaders/e4.fs");
+  Shader lightingShader("res/shaders/colors.vs", "res/shaders/colors.fs");
+  Shader lampShader("res/shaders/lamp.vs", "res/shaders/lamp.fs");
 
   Camera camera;
   float speed = 0.1;
 
-  float vertices[] = {
-      -0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
-      -0.5f, 0.5f, 0.0f,  0.0f, 1.0f, 
-      0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 
-      0.5f, -0.5f, 0.0f, 1.0f, 0.0f
-  };
+      float vertices[] = {
+        -0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+
+        -0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,
+
+        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+
+        -0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f, -0.5f,
+
+        -0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f,
+      };
 
   unsigned int indices[] = {0, 1, 3, 1, 2, 3};
 
-  unsigned int VBO, VAO, EBO;
-  glGenVertexArrays(1, &VAO);
-  glBindVertexArray(VAO);
-
+  // 1. Настраиваем VAO (и VBO)
+  unsigned int VBO, cubeVAO;
+  glGenVertexArrays(1, &cubeVAO);
   glGenBuffers(1, &VBO);
+
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-  glGenBuffers(1, &EBO);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
-               GL_STATIC_DRAW);
+  glBindVertexArray(cubeVAO);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+  // Координатные атрибуты
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
 
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float),
-                        (void*)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
+  // 2. Настраиваем VAO света (VBO остается неизменным; вершины те же и для
+  // светового объекта, который также является 3D-кубом)
+  unsigned int lightVAO;
+  glGenVertexArrays(1, &lightVAO);
+  glBindVertexArray(lightVAO);
 
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindVertexArray(0);
+  // Нам нужно только привязаться к VBO (чтобы связать его с
+  // glVertexAttribPointer), нам не нужно его заполнять; данные VBO уже содержат
+  // всё, что нам нужно (они уже привязаны, но мы делаем это снова в
+  // образовательных целях)
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-  unsigned int texture;
-  glGenTextures(1, &texture);
-  glBindTexture(GL_TEXTURE_2D, texture);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-  int width, height, nrChannels;
-  stbi_set_flip_vertically_on_load(true);
-
-  unsigned char* data =
-      stbi_load("res/imgs/1.jpg", &width, &height, &nrChannels, 0);
-  if (data) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
-                 GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-  } else {
-    std::cout << "Failed to load texture" << std::endl;
-  }
-  stbi_image_free(data);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
 
   bool isGo = true;
   while (isGo) {
@@ -161,25 +187,59 @@ int main() {
       }
     }
 
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    // Рендеринг
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glBindTexture(GL_TEXTURE_2D, texture);
+    // Убеждаемся, что активировали шейдер прежде, чем настраивать
+    // uniform-переменные/объекты_рисования
+    lightingShader.use();
+    lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
+    lightingShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
 
-    myShader.use();
+    lightingShader.setMat4("projection", camera.GetProjectionMatrix());
+    lightingShader.setMat4("view", camera.GetViewMatrix());
 
-    glm::mat4 model = glm::mat4(1.0f);
+     glm::mat4 model = glm::mat4(1.0f);
+    lightingShader.setMat4("model", model);
 
-    myShader.setMat4("model", model);
-    myShader.setMat4("view", camera.GetViewMatrix());
-    myShader.setMat4("projection", camera.GetProjectionMatrix());
+    glBindVertexArray(cubeVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    glBindVertexArray(VAO);
+    lampShader.use();
+    lampShader.setMat4("projection", camera.GetProjectionMatrix());
+    lampShader.setMat4("view", camera.GetViewMatrix());
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, lightPos);
+    model = glm::scale(model, glm::vec3(0.2f));  // куб меньшего размера
+    lampShader.setMat4("model", model);
 
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(lightVAO);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    //glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    //glClear(GL_COLOR_BUFFER_BIT);
+
+    ////glBindTexture(GL_TEXTURE_2D, texture);
+
+    //myShader.use();
+
+    //glm::mat4 model = glm::mat4(1.0f);
+
+    //myShader.setMat4("model", model);
+    //myShader.setMat4("view", camera.GetViewMatrix());
+    //myShader.setMat4("projection", camera.GetProjectionMatrix());
+
+    //glBindVertexArray(VAO);
+
+    //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     window.display();
   }
+
+  glDeleteVertexArrays(1, &cubeVAO);
+  glDeleteVertexArrays(1, &lightVAO);
+  glDeleteBuffers(1, &VBO);
 
   window.close();
   return 0;
