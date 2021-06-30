@@ -52,9 +52,9 @@ int main() {
   sf::RenderWindow window(sf::VideoMode(800, 600, 32), "First Window",
                           sf::Style::Titlebar | sf::Style::Close);
 
- // window.setMouseCursorVisible(false);
+  window.setMouseCursorVisible(false);
 
-  //window.setMouseCursorGrabbed(true);
+  window.setMouseCursorGrabbed(true);
 
   glewExperimental = GL_TRUE;
 
