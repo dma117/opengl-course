@@ -36,6 +36,14 @@ class Shader {
     glUniform3f(glGetUniformLocation(ID, name.c_str()), x, y, z);
   }
 
+  void setInt(const std::string& name, int data) const {
+    glUniform1i(glGetUniformLocation(ID, name.c_str()), data);
+  }
+
+  void setFloat(const std::string& name, float data) const {
+    glUniform1f(glGetUniformLocation(ID, name.c_str()), data);
+  }
+
   unsigned int GetID() { return ID; }
 
  private:

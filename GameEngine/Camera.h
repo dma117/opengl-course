@@ -12,6 +12,7 @@ class Camera {
 
   glm::vec3 GetVecFront() const;
   glm::vec3 GetVecUp() const;
+  glm::vec3 GetPosition() const;
   void SetVecFront(const glm::vec3&); 
 
   void Move(glm::vec3);

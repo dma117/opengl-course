@@ -46,17 +46,17 @@ void MouseMove(float xPos, float yPos) {
 int main() {
   sf::ContextSettings settings;
   settings.depthBits = 24;
-  settings.stencilBits = 8;
+  settings.stencilBits = 8; 
   settings.majorVersion = 4;
   settings.minorVersion = 3;
   settings.attributeFlags = sf::ContextSettings::Core;
 
-  sf::RenderWindow window(sf::VideoMode(800, 600, 32), "First Window",
-                          sf::Style::Titlebar | sf::Style::Close);
+  sf::RenderWindow window(sf::VideoMode(1920, 1080, 32), "First Window",
+                          sf::Style::Titlebar | sf::Style::Close, settings);
 
-  window.setMouseCursorVisible(false);
-
-  window.setMouseCursorGrabbed(true);
+  //window.setMouseCursorVisible(false);
+  //window.setMouseCursorGrabbed(true);
+  
 
   glewExperimental = GL_TRUE;
 
@@ -65,6 +65,8 @@ int main() {
     return -1;
   }
 
+  glEnable(GL_DEPTH_TEST);
+
   Shader myShader("res/shaders/e4.vs", "res/shaders/e4.fs");
   Shader lightingShader("res/shaders/colors.vs", "res/shaders/colors.fs");
   Shader lampShader("res/shaders/lamp.vs", "res/shaders/lamp.fs");
@@ -72,93 +74,103 @@ int main() {
   Camera camera;
   float speed = 0.1;
 
-      float vertices[] = {
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
+  float vertices[] = {
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 
+     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 
+     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 
+    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 
+    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 
+ 
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+ 
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+ 
+     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+     0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+ 
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+ 
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+     0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+  };
 
-        -0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
+  // 1. Настраиваем VAO (и VBO) куба
+    unsigned int VBO, cubeVAO;
+    glGenVertexArrays(1, &cubeVAO);
+    glGenBuffers(1, &VBO);
 
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
+    glBindVertexArray(cubeVAO);
 
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f, -0.5f,
+    // Координатные атрибуты
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+	
+    // Атрибуты нормалей
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
-        -0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
-      };
+    // 2. Настраиваем VAO света (VBO остается неизменным; вершины те же и для светового объекта, который также является 3D-кубом)
+    unsigned int lightVAO;
+    glGenVertexArrays(1, &lightVAO);
+    glBindVertexArray(lightVAO);
 
-  unsigned int indices[] = {0, 1, 3, 1, 2, 3};
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-  // 1. Настраиваем VAO (и VBO)
-  unsigned int VBO, cubeVAO;
-  glGenVertexArrays(1, &cubeVAO);
-  glGenBuffers(1, &VBO);
-
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-  glBindVertexArray(cubeVAO);
-
-  // Координатные атрибуты
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(0);
-
-  // 2. Настраиваем VAO света (VBO остается неизменным; вершины те же и для
-  // светового объекта, который также является 3D-кубом)
-  unsigned int lightVAO;
-  glGenVertexArrays(1, &lightVAO);
-  glBindVertexArray(lightVAO);
-
-  // Нам нужно только привязаться к VBO (чтобы связать его с
-  // glVertexAttribPointer), нам не нужно его заполнять; данные VBO уже содержат
-  // всё, что нам нужно (они уже привязаны, но мы делаем это снова в
-  // образовательных целях)
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(0);
+    // Обратите внимание, что мы обновляем шаг атрибута положения лампы, чтобы отразить обновленные данные буфера
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
 
   bool isGo = true;
+  int time = 0;
+
+  sf::Clock clock;
+
   while (isGo) {
     sf::Event windowEvent;
     while (window.pollEvent(windowEvent)) {
       auto mouse_position = sf::Mouse::getPosition(); 
                 MouseMove(mouse_position.x, mouse_position.y);
 
+
+                std::cout << sf::Mouse::getPosition().x << ' ' << sf::Mouse::getPosition().y << std::endl;
+
       glm::vec3 direction;
       direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
       direction.y = sin(glm::radians(pitch));
       direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
       camera.SetVecFront(glm::normalize(direction));
+
+
+     /* if (sf::Mouse::getPosition().x > window.getSize().x) {
+        sf::Mouse::setPosition(sf::Vector2i(window.getSize().x / 2, window.getSize().y / 2));
+      }*/
 
       switch (windowEvent.type) {
         case sf::Event::Closed:
@@ -178,10 +190,6 @@ int main() {
             camera.Move(glm::normalize(glm::cross(camera.GetVecFront(),camera.GetVecUp())) * speed);
           }
           break;
-        case sf::Event::MouseMoved:
-
-
-          break;
         default:
           break;
       }
@@ -196,16 +204,44 @@ int main() {
     lightingShader.use();
     lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
     lightingShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+    lightingShader.setVec3("lightPos", lightPos);
+    lightingShader.setVec3("viewPos", camera.GetPosition());
 
+    lightingShader.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
+    lightingShader.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
+    lightingShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+    lightingShader.setFloat("material.shininess", 32.0f);
+
+    lightingShader.setVec3("light.ambient",  0.2f, 0.2f, 0.2f);
+    lightingShader.setVec3("light.diffuse",  0.5f, 0.5f, 0.5f); // немного затемним рассеянный свет
+    lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
+    glm::vec3 lightColor;
+    auto ticks = clock.getElapsedTime().asSeconds();
+
+    lightColor.x = sin(ticks * 2.0f);
+    lightColor.y = sin(ticks * 0.7f);
+    lightColor.z = sin(ticks * 1.3f);
+
+    glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
+    glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
+
+    lightingShader.setVec3("light.ambient", ambientColor);
+    lightingShader.setVec3("light.diffuse", diffuseColor);
+
+    // Преобразования Вида/Проекции
     lightingShader.setMat4("projection", camera.GetProjectionMatrix());
     lightingShader.setMat4("view", camera.GetViewMatrix());
 
-     glm::mat4 model = glm::mat4(1.0f);
+    // Мировое преобразование
+    glm::mat4 model = glm::mat4(1.0f);
     lightingShader.setMat4("model", model);
 
+    // Рендеринг куба
     glBindVertexArray(cubeVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
+    // Также отрисовываем наш объект-"лампочку"
     lampShader.use();
     lampShader.setMat4("projection", camera.GetProjectionMatrix());
     lampShader.setMat4("view", camera.GetViewMatrix());
@@ -237,6 +273,8 @@ int main() {
     window.display();
   }
 
+   // Опционально: освобождаем все ресурсы, как только они выполнили свое
+  // предназначение
   glDeleteVertexArrays(1, &cubeVAO);
   glDeleteVertexArrays(1, &lightVAO);
   glDeleteBuffers(1, &VBO);
