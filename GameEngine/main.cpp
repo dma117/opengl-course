@@ -141,7 +141,7 @@ int main() {
 
     // Атрибуты текстуры
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
 
     // 2. Настраиваем VAO света (VBO остается неизменным; вершины те же и для светового объекта, который также является 3D-кубом)
     unsigned int lightVAO;
@@ -154,11 +154,10 @@ int main() {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
+    lightingShader.use();
+    lightingShader.setInt("material.diffuse", 0);
+
   bool isGo = true;
-  int time = 0;
-
-  sf::Clock clock;
-
   while (isGo) {
     sf::Event windowEvent;
     while (window.pollEvent(windowEvent)) {
@@ -223,18 +222,15 @@ int main() {
     lightingShader.setVec3("light.diffuse",  0.5f, 0.5f, 0.5f); // немного затемним рассеянный свет
     lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
 
-    glm::vec3 lightColor;
-    auto ticks = clock.getElapsedTime().asSeconds();
+    //glm::vec3 lightColor;
+    //auto ticks = clock.getElapsedTime().asSeconds();
 
-    lightColor.x = sin(ticks * 2.0f);
-    lightColor.y = sin(ticks * 0.7f);
-    lightColor.z = sin(ticks * 1.3f);
+    //lightColor.x = sin(ticks * 2.0f);
+    //lightColor.y = sin(ticks * 0.7f);
+    //lightColor.z = sin(ticks * 1.3f);
 
-    glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
-    glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
-
-    lightingShader.setVec3("light.ambient", ambientColor);
-    lightingShader.setVec3("light.diffuse", diffuseColor);
+    //glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
+    //glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
 
     // Преобразования Вида/Проекции
     lightingShader.setMat4("projection", camera.GetProjectionMatrix());
@@ -245,9 +241,8 @@ int main() {
     lightingShader.setMat4("model", model);
 
     // Рендеринг куба
-    texture.Bind();
-
     glBindVertexArray(cubeVAO);
+    texture.Bind();
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     // Также отрисовываем наш объект-"лампочку"
