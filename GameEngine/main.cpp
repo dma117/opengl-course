@@ -74,7 +74,8 @@ int main() {
 
   Camera camera;
   float speed = 0.1;
-  Texture texture("res/imgs/1.jpg");
+  Texture wooden_full("res/imgs/wooden_full.png");
+  Texture wooden("res/imgs/wooden.png");
 
   float vertices[] = {
      // координаты        // нормали           // текстурные координаты
@@ -156,16 +157,14 @@ int main() {
 
     lightingShader.use();
     lightingShader.setInt("material.diffuse", 0);
+    lightingShader.setInt("material.specular", 1);
 
   bool isGo = true;
   while (isGo) {
     sf::Event windowEvent;
     while (window.pollEvent(windowEvent)) {
       auto mouse_position = sf::Mouse::getPosition(); 
-                MouseMove(mouse_position.x, mouse_position.y);
-
-
-                std::cout << sf::Mouse::getPosition().x << ' ' << sf::Mouse::getPosition().y << std::endl;
+      MouseMove(mouse_position.x, mouse_position.y);
 
       glm::vec3 direction;
       direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
@@ -242,7 +241,13 @@ int main() {
 
     // Рендеринг куба
     glBindVertexArray(cubeVAO);
-    texture.Bind();
+    
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, wooden_full.GetTextureId());
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, wooden.GetTextureId());  
+
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     // Также отрисовываем наш объект-"лампочку"
