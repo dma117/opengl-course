@@ -13,32 +13,29 @@
 #include "Texture.h"
 
 bool firstMouseMovement = true;
-float xPos = 400, yPos = 300;
+float lastX = 400, lastY = 300;
 float yaw = -90, pitch = 0;
 
-//void MouseMove(float xPos, float yPos) {
-//  if (firstMouseMovement) {
-//    lastX = xPos;
-//    lastY = yPos;
-//
-//    firstMouseMovement = false;
-//  } 
-//  float xoffset = xPos - lastX;
-//  float yoffset = lastY - yPos;
-//
-//  lastX = xPos;
-//  lastY = yPos;
-//
-//  const float sensitivity = 0.1f;
-//  xoffset *= sensitivity;
-//  yoffset *= sensitivity;
-//
-//  yaw += xoffset;
-//  pitch += yoffset;
-//
-//  if (pitch > 70.0f) pitch = 70.0f;
-//  if (pitch < -70.0f) pitch = -70.0f;
-//}
+void MouseMove(float xPos, float yPos) {
+  if (firstMouseMovement) {
+    lastX = xPos;
+    lastY = yPos;
+
+    firstMouseMovement = false;
+  } 
+  float xoffset = xPos - lastX;
+  float yoffset = lastY - yPos;
+
+  lastX = xPos;
+  lastY = yPos;
+
+  const float sensitivity = 0.1f;
+  xoffset *= sensitivity;
+  yoffset *= sensitivity;
+
+  yaw += xoffset;
+  pitch += yoffset;
+}
 
 
 int main() {
@@ -122,14 +119,14 @@ int main() {
   while (isGo) {
     sf::Event windowEvent;
     while (window.pollEvent(windowEvent)) {
-      /*auto mouse_position = sf::Mouse::getPosition(window); 
+      auto mouse_position = sf::Mouse::getPosition(window); 
       MouseMove(mouse_position.x, mouse_position.y);
 
       Vec3 direction;
       direction[0] = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
       direction[1] = sin(glm::radians(pitch));
       direction[2] = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-      camera.SetVecFront(direction.Normalize());*/
+      camera.SetVecFront(direction.Normalize());
 
       switch (windowEvent.type) {
         case sf::Event::Closed:
@@ -137,31 +134,18 @@ int main() {
           break;
         case sf::Event::KeyPressed:
           if (windowEvent.key.code == sf::Keyboard::A) {
-            camera.Move((camera.GetVecFront().GetVectorProductWith(camera.GetVecUp())).Normalize() * (-1) * speed);
+            camera.Translate((camera.GetVecFront().GetVectorProductWith(camera.GetVecUp())).Normalize() * (-1) * speed);
           }
           if (windowEvent.key.code == sf::Keyboard::W) {
-            camera.Move(camera.GetVecFront() * speed);
+            camera.Translate(camera.GetVecFront() * speed);
           }
           if (windowEvent.key.code == sf::Keyboard::S) {
-            camera.Move(camera.GetVecFront() * (-1) * speed);
+            camera.Translate(camera.GetVecFront() * (-1) * speed);
           }
           if (windowEvent.key.code == sf::Keyboard::D) {
-            camera.Move((camera.GetVecFront().GetVectorProductWith(camera.GetVecUp())).Normalize() * speed);
+            camera.Translate((camera.GetVecFront().GetVectorProductWith(camera.GetVecUp())).Normalize() * speed);
           }
-        case sf::Event::MouseMoved:
-          float xOffset = sf::Mouse::getPosition(window).x - xPos;
-          float yOffset = yPos - sf::Mouse::getPosition(window).y;
-          xPos = sf::Mouse::getPosition(window).x;
-          yPos = sf::Mouse::getPosition(window).y;
-
-          yaw += (xOffset * speed);
-          pitch += (yOffset * speed);
-
-          Vec3 front;
-          front[0] = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-          front[1] = sin(glm::radians(pitch));
-          front[2] = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-          camera.SetVecFront(front.Normalize());
+        default:
           break;
       }
     }

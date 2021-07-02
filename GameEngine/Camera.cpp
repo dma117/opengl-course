@@ -33,6 +33,6 @@ void Camera::SetVecFront(const Vec3& new_vec_front) {
   vec_front_ = new_vec_front;
 }
 
-void Camera::Move(const Vec3& offset) {
+void Camera::Translate(const Vec3& offset) {
   position_ += offset;
 }

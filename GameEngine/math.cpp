@@ -1031,5 +1031,5 @@ Mat4 Mat4::LookAt(Vec3 position, Vec3 center, Vec3 up) {
     translation.matrix_[3][1] = -position[1];
     translation.matrix_[3][2] = -position[2];
 
-    return rotation * translation;
+    return translation * rotation;
 }

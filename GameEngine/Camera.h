@@ -13,7 +13,7 @@ class Camera {
   Vec3 GetPosition() const;
   void SetVecFront(const Vec3&); 
 
-  void Move(const Vec3&);
+  void Translate(const Vec3&);
  private:
   Vec3 position_;
   Vec3 vec_up_;
