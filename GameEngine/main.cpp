@@ -68,7 +68,7 @@ int main() {
   glEnable(GL_DEPTH_TEST);
 
   Shader myShader("res/shaders/e4.vs", "res/shaders/e4.fs");
-  Shader lightingShader("res/shaders/colors.vs", "res/shaders/colors.fs");
+  Shader cubeLightingShader("res/shaders/colors.vs", "res/shaders/colors.fs");
   Shader lampShader("res/shaders/lamp.vs", "res/shaders/lamp.fs");
 
   Camera camera;
@@ -76,8 +76,7 @@ int main() {
   Texture wooden_full("res/imgs/wooden_full.png");
   Texture wooden("res/imgs/wooden.png");
 
-  // Указание вершин (и буфера(ов)) и настройка вершинных атрибутов
-    float vertices[] = {
+  float vertices[] = {
          // координаты        // нормали           // текстурные координаты
         -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
          0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
@@ -120,61 +119,62 @@ int main() {
          0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
         -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
-    };
+  };
+	
 	
     // Координаты всех контейнеров
-    glm::vec3 cubePositions[] = {
-        glm::vec3(0.0f,  0.0f,  0.0f),
-        glm::vec3(2.0f,  5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3(2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f,  3.0f, -7.5f),
-        glm::vec3(1.3f, -2.0f, -2.5f),
-        glm::vec3(1.5f,  2.0f, -2.5f),
-        glm::vec3(1.5f,  0.2f, -1.5f),
-        glm::vec3(-1.3f,  1.0f, -1.5f)
-    };
+  glm::vec3 cubePositions[] = {
+      glm::vec3(0.0f,  0.0f,  0.0f),
+      glm::vec3(2.0f,  5.0f, -15.0f),
+      glm::vec3(-1.5f, -2.2f, -2.5f),
+      glm::vec3(-3.8f, -2.0f, -12.3f),
+      glm::vec3(2.4f, -0.4f, -3.5f),
+      glm::vec3(-1.7f,  3.0f, -7.5f),
+      glm::vec3(1.3f, -2.0f, -2.5f),
+      glm::vec3(1.5f,  2.0f, -2.5f),
+      glm::vec3(1.5f,  0.2f, -1.5f),
+      glm::vec3(-1.3f,  1.0f, -1.5f) 
+  };
 
     // Координаты точечных источников света
-    glm::vec3 pointLightPositions[] = {
-        glm::vec3(0.7f,  0.2f,  2.0f),
-        glm::vec3(2.3f, -3.3f, -4.0f),
-        glm::vec3(-4.0f,  2.0f, -12.0f),
-        glm::vec3(0.0f,  0.0f, -3.0f)
-    };
+  glm::vec3 pointLightPositions[] = {
+      glm::vec3(0.7f,  0.2f,  2.0f),
+      glm::vec3(2.3f, -3.3f, -4.0f),
+      glm::vec3(-4.0f,  2.0f, -12.0f),
+      glm::vec3(0.0f,  0.0f, -3.0f)
+  };
         
   // 1. Настраиваем VAO (и VBO) куба
-    unsigned int VBO, cubeVAO;
-    glGenVertexArrays(1, &cubeVAO);
-    glGenBuffers(1, &VBO);
+  unsigned int VBO, cubeVAO;
+  glGenVertexArrays(1, &cubeVAO);
+  glGenBuffers(1, &VBO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glBindVertexArray(cubeVAO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
+  glBindVertexArray(cubeVAO);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+  glEnableVertexAttribArray(2);
 
-    // 2. Настраиваем VAO света (VBO остается неизменным; вершины те же и для светового объекта, который также является 3D-кубом)
-    unsigned int lightCubeVAO;;
-    glGenVertexArrays(1, &lightCubeVAO);
-    glBindVertexArray(lightCubeVAO);
+  // 2. Настраиваем VAO света (VBO остается неизменным; вершины те же и для светового объекта, который также является 3D-кубом)
+  unsigned int lightCubeVAO;;
+  glGenVertexArrays(1, &lightCubeVAO);
+  glBindVertexArray(lightCubeVAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-    // Обратите внимание, что мы обновляем шаг атрибута положения лампы, чтобы отразить обновленные данные буфера
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+  // Обратите внимание, что мы обновляем шаг атрибута положения лампы, чтобы отразить обновленные данные буфера
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
 	
-    // Конфигурация шейдеров
-    lightingShader.use();
-    lightingShader.setInt("material.diffuse", 0);
-    lightingShader.setInt("material.specular", 1);
+  // Конфигурация шейдеров
+  cubeLightingShader.use();
+  cubeLightingShader.setInt("material.diffuse", 0);
+  cubeLightingShader.setInt("material.specular", 1);
 
   bool isGo = true;
   while (isGo) {
@@ -212,77 +212,45 @@ int main() {
       }
     }
 
-    // Рендеринг
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Убеждаемся, что активировали шейдер прежде, чем настраивать
     // uniform-переменные/объекты_рисования
-    lightingShader.use();
-    lightingShader.setVec3("viewPos", camera.GetPosition());
-    lightingShader.setFloat("material.shininess", 32.0f);
+    cubeLightingShader.use();
+    cubeLightingShader.setVec3("viewPos", camera.GetPosition());
+    cubeLightingShader.setFloat("material.shininess", 32.0f);
 
     // Направленный свет
-    lightingShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
-    lightingShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-    lightingShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
-    lightingShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+    cubeLightingShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+    cubeLightingShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+    cubeLightingShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+    cubeLightingShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
 
-    // Точечный источник света №1
-    lightingShader.setVec3("pointLights[0].position", pointLightPositions[0]);
-    lightingShader.setVec3("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
-    lightingShader.setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
-    lightingShader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
-    lightingShader.setFloat("pointLights[0].constant", 1.0f);
-    lightingShader.setFloat("pointLights[0].linear", 0.09);
-    lightingShader.setFloat("pointLights[0].quadratic", 0.032);
-
-    // Точечный источник света №2
-    lightingShader.setVec3("pointLights[1].position", pointLightPositions[1]);
-    lightingShader.setVec3("pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
-    lightingShader.setVec3("pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
-    lightingShader.setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
-    lightingShader.setFloat("pointLights[1].constant", 1.0f);
-    lightingShader.setFloat("pointLights[1].linear", 0.09);
-    lightingShader.setFloat("pointLights[1].quadratic", 0.032);
-
-    // Точечный источник света №3
-    lightingShader.setVec3("pointLights[2].position", pointLightPositions[2]);
-    lightingShader.setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
-    lightingShader.setVec3("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
-    lightingShader.setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
-    lightingShader.setFloat("pointLights[2].constant", 1.0f);
-    lightingShader.setFloat("pointLights[2].linear", 0.09);
-    lightingShader.setFloat("pointLights[2].quadratic", 0.032);
-
-    // Точечный источник света №4
-    lightingShader.setVec3("pointLights[3].position", pointLightPositions[3]);
-    lightingShader.setVec3("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
-    lightingShader.setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
-    lightingShader.setVec3("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
-    lightingShader.setFloat("pointLights[3].constant", 1.0f);
-    lightingShader.setFloat("pointLights[3].linear", 0.09);
-    lightingShader.setFloat("pointLights[3].quadratic", 0.032);
+    for (int i = 0; i < 4; i++) {
+        cubeLightingShader.setVec3("pointLights[" + std::to_string(i) + "].position", pointLightPositions[0]);
+        cubeLightingShader.setVec3("pointLights[" + std::to_string(i) + "].ambient", 0.05f, 0.05f, 0.05f);
+        cubeLightingShader.setVec3("pointLights[" + std::to_string(i) + "].diffuse", 0.8f, 0.8f, 0.8f);
+        cubeLightingShader.setVec3("pointLights[" + std::to_string(i) + "].specular", 1.0f, 1.0f, 1.0f);
+        cubeLightingShader.setFloat("pointLights[" + std::to_string(i) + "].constant", 1.0f);
+        cubeLightingShader.setFloat("pointLights[" + std::to_string(i) + "].linear", 0.09);
+        cubeLightingShader.setFloat("pointLights[" + std::to_string(i) + "].quadratic", 0.032);
+    }
 
     // Прожектор
-    lightingShader.setVec3("spotLight.position", camera.GetPosition());
-    lightingShader.setVec3("spotLight.direction", camera.GetVecFront());
-    lightingShader.setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
-    lightingShader.setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
-    lightingShader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
-    lightingShader.setFloat("spotLight.constant", 1.0f);
-    lightingShader.setFloat("spotLight.linear", 0.09);
-    lightingShader.setFloat("spotLight.quadratic", 0.032);
-    lightingShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-    lightingShader.setFloat("spotLight.outerCutOff",
-                            glm::cos(glm::radians(15.0f)));
-
-    lightingShader.setMat4("projection", camera.GetProjectionMatrix());
-    lightingShader.setMat4("view", camera.GetViewMatrix());
-
-    // Мировое преобразование
-    glm::mat4 model = glm::mat4(1.0f);
-    lightingShader.setMat4("model", model);
+    cubeLightingShader.setVec3("spotLight.position", camera.GetPosition());
+    cubeLightingShader.setVec3("spotLight.direction", camera.GetVecFront());
+    cubeLightingShader.setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
+    cubeLightingShader.setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
+    cubeLightingShader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
+    cubeLightingShader.setFloat("spotLight.constant", 1.0f);
+    cubeLightingShader.setFloat("spotLight.linear", 0.09);
+    cubeLightingShader.setFloat("spotLight.quadratic", 0.032);
+    cubeLightingShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+    cubeLightingShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
+    cubeLightingShader.setMat4("projection", camera.GetProjectionMatrix());
+    cubeLightingShader.setMat4("view", camera.GetViewMatrix());
+    cubeLightingShader.setMat4("model", glm::mat4(1.0f));
 
     // Связывание диффузной карты
     glActiveTexture(GL_TEXTURE0);
@@ -299,9 +267,8 @@ int main() {
       glm::mat4 model = glm::mat4(1.0f);
       model = glm::translate(model, cubePositions[i]);
       float angle = 20.0f * i;
-      model =
-          glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-      lightingShader.setMat4("model", model);
+      model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+      cubeLightingShader.setMat4("model", model);
 
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
@@ -315,7 +282,7 @@ int main() {
     // источников света
     glBindVertexArray(lightCubeVAO);
     for (unsigned int i = 0; i < 4; i++) {
-      model = glm::mat4(1.0f);
+      auto model = glm::mat4(1.0f);
       model = glm::translate(model, pointLightPositions[i]);
       model = glm::scale(model, glm::vec3(0.2f));  // меньший куб
       lampShader.setMat4("model", model);
@@ -325,8 +292,6 @@ int main() {
     window.display();
   }
 
-   // Опционально: освобождаем все ресурсы, как только они выполнили свое
-  // предназначение
   glDeleteVertexArrays(1, &cubeVAO);
   glDeleteVertexArrays(1, &lightCubeVAO);
   glDeleteBuffers(1, &VBO);
