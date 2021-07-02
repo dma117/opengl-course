@@ -1,23 +1,25 @@
 #pragma once
 #include <SFML/Window.hpp>
-#include "math.h"
+#include "glm/vec3.hpp"
+#include "glm/mat4x4.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 class Camera {
  public:
   Camera();
-  Mat4 GetProjectionMatrix();
-  Mat4 GetViewMatrix();
+  glm::mat4 GetProjectionMatrix();
+  glm::mat4 GetViewMatrix();
 
-  Vec3 GetVecFront() const;
-  Vec3 GetVecUp() const;
-  Vec3 GetPosition() const;
-  void SetVecFront(const Vec3&); 
+  glm::vec3 GetVecFront() const;
+  glm::vec3 GetVecUp() const;
+  glm::vec3 GetPosition() const;
+  void SetVecFront(const glm::vec3&); 
 
-  void Move(Vec3);
+  void Move(glm::vec3);
  private:
-  Vec3 position_;
-  Vec3 vec_up_;
-  Vec3 vec_front_;
+  glm::vec3 position_;
+  glm::vec3 vec_up_;
+  glm::vec3 vec_front_;
 
   float ratio_;
   float fov_;

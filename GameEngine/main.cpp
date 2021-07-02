@@ -7,6 +7,8 @@
 #include <iostream>
 
 #include "glm/gtc/matrix_transform.hpp"
+#include "glm/mat4x4.hpp"
+#include "glm/vec3.hpp"
 #include "Camera.h"
 #include "Shader.h"
 #include "stb_image.h"
@@ -16,7 +18,7 @@ bool firstMouseMovement = true;
 float lastX = 400, lastY = 300;
 float yaw = -90, pitch = 0;
 
-Vec3 lightPos(1.2f, 1.0f, 2.0f);
+glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 void MouseMove(float xPos, float yPos) {
   if (firstMouseMovement) {
@@ -164,11 +166,11 @@ int main() {
       auto mouse_position = sf::Mouse::getPosition(); 
       MouseMove(mouse_position.x, mouse_position.y);
 
-      Vec3 direction;
-      direction[0] = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-      direction[1] = sin(glm::radians(pitch));
-      direction[2] = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-      camera.SetVecFront(direction.Normalize());
+      glm::vec3 direction;
+      direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+      direction.y = sin(glm::radians(pitch));
+      direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+      camera.SetVecFront(glm::normalize(direction));
 
 
      /* if (sf::Mouse::getPosition().x > window.getSize().x) {
@@ -181,16 +183,16 @@ int main() {
           break;
         case sf::Event::KeyPressed:
           if (windowEvent.key.code == sf::Keyboard::A) {
-            camera.Move((camera.GetVecFront().GetVectorProductWith(camera.GetVecUp())).Normalize() * (-1) * speed);
+            camera.Move(-glm::normalize(glm::cross(camera.GetVecFront(), camera.GetVecUp())) * speed);
           }
           if (windowEvent.key.code == sf::Keyboard::W) {
             camera.Move(camera.GetVecFront() * speed);
           }
           if (windowEvent.key.code == sf::Keyboard::S) {
-            camera.Move(camera.GetVecFront() * (-1) * speed);
+            camera.Move(-camera.GetVecFront() * speed);
           }
           if (windowEvent.key.code == sf::Keyboard::D) {
-            camera.Move((camera.GetVecFront().GetVectorProductWith(camera.GetVecUp())).Normalize() * speed);
+            camera.Move(glm::normalize(glm::cross(camera.GetVecFront(),camera.GetVecUp())) * speed);
           }
           break;
         default:
@@ -234,7 +236,7 @@ int main() {
     lightingShader.setMat4("view", camera.GetViewMatrix());
 
     // Мировое преобразование
-    Mat4 model = Mat4(1.0f);
+    glm::mat4 model = glm::mat4(1.0f);
     lightingShader.setMat4("model", model);
 
     // Рендеринг куба
@@ -252,10 +254,9 @@ int main() {
     lampShader.use();
     lampShader.setMat4("projection", camera.GetProjectionMatrix());
     lampShader.setMat4("view", camera.GetViewMatrix());
-    /*model = glm::mat4(1.0f);
-    model = glm::translate(model, lightPos);*/
-    model = Mat4::GetTranslated(lightPos);
-    model = Mat4::GetTranslated(Vec3(0.2f));
+    model = glm::mat4(1.0f);
+    model = glm::translate(model, lightPos);
+    model = glm::scale(model, glm::vec3(0.2f));  // куб меньшего размера
     lampShader.setMat4("model", model);
 
     glBindVertexArray(lightVAO);
