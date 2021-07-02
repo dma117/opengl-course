@@ -1,6 +1,8 @@
 #version 330 core
 out vec4 FragColor;
 
+const int POINTS_LIGHT_SIZE = 4;
+
 in vec3 Normal;  
 in vec3 FragPos;
 in vec2 TexCoords;  
@@ -16,14 +18,26 @@ struct Material {
     float shininess;
 }; 
 
-struct Light {
+struct PointLight {
     vec3 position;
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
+	float constant;
+	float linear;
+	float quadratic;
 };
  
+struct DirLight {
+	vec3 direction;
+	vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+}; 
+ 
 uniform Light light;
+uniform DirLight dirLight;
+uniform PointLight pointLights[POINTS_LIGHT_SIZE];
 uniform Material material;
 
 void main()
