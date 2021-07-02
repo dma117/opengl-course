@@ -5,15 +5,15 @@
 class Camera {
  public:
   Camera();
-  Mat4 GetProjectionMatrix();
-  Mat4 GetViewMatrix();
+  Mat4 GetProjectionMatrix() const;
+  Mat4 GetViewMatrix() const;
 
   Vec3 GetVecFront() const;
   Vec3 GetVecUp() const;
   Vec3 GetPosition() const;
   void SetVecFront(const Vec3&); 
 
-  void Move(Vec3);
+  void Move(const Vec3&);
  private:
   Vec3 position_;
   Vec3 vec_up_;

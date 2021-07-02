@@ -24,7 +24,8 @@ class Shader {
 
   void setMat4(std::string name, const Mat4& data) const {
     auto location = glGetUniformLocation(ID, name.c_str());
-    glUniformMatrix4fv(location, 1, GL_FALSE, &Mat4ToGlmMatrix(data)[0][0]);
+    auto matrix = Mat4ToGlmMatrix(data);
+    glUniformMatrix4fv(location, 1, GL_FALSE, &matrix[0][0]);
   }
 
   void setVec3(const std::string& name, const Vec3& data) const {

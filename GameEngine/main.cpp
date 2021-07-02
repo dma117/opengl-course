@@ -13,49 +13,48 @@
 #include "Texture.h"
 
 bool firstMouseMovement = true;
-float lastX = 400, lastY = 300;
+float xPos = 400, yPos = 300;
 float yaw = -90, pitch = 0;
 
-Vec3 lightPos(1.2f, 1.0f, 2.0f);
+//void MouseMove(float xPos, float yPos) {
+//  if (firstMouseMovement) {
+//    lastX = xPos;
+//    lastY = yPos;
+//
+//    firstMouseMovement = false;
+//  } 
+//  float xoffset = xPos - lastX;
+//  float yoffset = lastY - yPos;
+//
+//  lastX = xPos;
+//  lastY = yPos;
+//
+//  const float sensitivity = 0.1f;
+//  xoffset *= sensitivity;
+//  yoffset *= sensitivity;
+//
+//  yaw += xoffset;
+//  pitch += yoffset;
+//
+//  if (pitch > 70.0f) pitch = 70.0f;
+//  if (pitch < -70.0f) pitch = -70.0f;
+//}
 
-void MouseMove(float xPos, float yPos) {
-  if (firstMouseMovement) {
-    lastX = xPos;
-    lastY = yPos;
-
-    firstMouseMovement = false;
-  } 
-  float xoffset = xPos - lastX;
-  float yoffset = lastY - yPos;
-
-  lastX = xPos;
-  lastY = yPos;
-
-  const float sensitivity = 0.1f;
-  xoffset *= sensitivity;
-  yoffset *= sensitivity;
-
-  yaw += xoffset;
-  pitch += yoffset;
-
-  if (pitch > 70.0f) pitch = 70.0f;
-  if (pitch < -70.0f) pitch = -70.0f;
-}
 
 int main() {
   sf::ContextSettings settings;
   settings.depthBits = 24;
-  settings.stencilBits = 8; 
+  settings.stencilBits = 8;
   settings.majorVersion = 4;
   settings.minorVersion = 3;
   settings.attributeFlags = sf::ContextSettings::Core;
 
-  sf::RenderWindow window(sf::VideoMode(1920, 1080, 32), "First Window",
-                          sf::Style::Titlebar | sf::Style::Close, settings);
+  sf::RenderWindow window(sf::VideoMode(800, 600, 32), "First Window",
+                          sf::Style::Titlebar | sf::Style::Close);
 
-  //window.setMouseCursorVisible(false);
-  //window.setMouseCursorGrabbed(true);
-  
+  // window.setMouseCursorVisible(false);
+
+  // window.setMouseCursorGrabbed(true);
 
   glewExperimental = GL_TRUE;
 
@@ -64,116 +63,72 @@ int main() {
     return -1;
   }
 
-  glEnable(GL_DEPTH_TEST);
-
   Shader myShader("res/shaders/e4.vs", "res/shaders/e4.fs");
-  Shader lightingShader("res/shaders/colors.vs", "res/shaders/colors.fs");
-  Shader lampShader("res/shaders/lamp.vs", "res/shaders/lamp.fs");
 
   Camera camera;
   float speed = 0.1;
-  Texture wooden_full("res/imgs/wooden_full.png");
-  Texture wooden("res/imgs/wooden.png");
 
-  float vertices[] = {
-     // координаты        // нормали           // текстурные координаты
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
- 
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
- 
-    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
- 
-     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
- 
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
- 
-    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
-};
-        
-  // 1. Настраиваем VAO (и VBO) куба
-    unsigned int VBO, cubeVAO;
-    glGenVertexArrays(1, &cubeVAO);
-    glGenBuffers(1, &VBO);
+  float vertices[] = {-0.5f, -0.5f, 0.0f,  0.0f, 0.0f, -0.5f, 0.5f,
+                      0.0f,  0.0f,  1.0f,  0.5f, 0.5f, 0.0f,  1.0f,
+                      1.0f,  0.5f,  -0.5f, 0.0f, 1.0f, 0.0f};
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  unsigned int indices[] = {0, 1, 3, 1, 2, 3};
 
-    glBindVertexArray(cubeVAO);
+  unsigned int VBO, VAO, EBO;
+  glGenVertexArrays(1, &VAO);
+  glBindVertexArray(VAO);
 
-    // Координатные атрибуты
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-	
-    // Атрибуты нормалей
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
+  glGenBuffers(1, &VBO);
+  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    // Атрибуты текстуры
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
+  glGenBuffers(1, &EBO);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
+               GL_STATIC_DRAW);
 
-    // 2. Настраиваем VAO света (VBO остается неизменным; вершины те же и для светового объекта, который также является 3D-кубом)
-    unsigned int lightVAO;
-    glGenVertexArrays(1, &lightVAO);
-    glBindVertexArray(lightVAO);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
 
-    // Обратите внимание, что мы обновляем шаг атрибута положения лампы, чтобы отразить обновленные данные буфера
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindVertexArray(0);
 
-    lightingShader.use();
-    lightingShader.setInt("material.diffuse", 0);
-    lightingShader.setInt("material.specular", 1);
+  unsigned int texture;
+  glGenTextures(1, &texture);
+  glBindTexture(GL_TEXTURE_2D, texture);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+  int width, height, nrChannels;
+  stbi_set_flip_vertically_on_load(true);
+
+  unsigned char* data =
+      stbi_load("res/imgs/1.jpg", &width, &height, &nrChannels, 0);
+  if (data) {
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+                 GL_UNSIGNED_BYTE, data);
+    glGenerateMipmap(GL_TEXTURE_2D);
+  } else {
+    std::cout << "Failed to load texture" << std::endl;
+  }
+  stbi_image_free(data);
 
   bool isGo = true;
   while (isGo) {
     sf::Event windowEvent;
     while (window.pollEvent(windowEvent)) {
-      auto mouse_position = sf::Mouse::getPosition(); 
+      /*auto mouse_position = sf::Mouse::getPosition(window); 
       MouseMove(mouse_position.x, mouse_position.y);
 
       Vec3 direction;
       direction[0] = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
       direction[1] = sin(glm::radians(pitch));
       direction[2] = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-      camera.SetVecFront(direction.Normalize());
-
-
-     /* if (sf::Mouse::getPosition().x > window.getSize().x) {
-        sf::Mouse::setPosition(sf::Vector2i(window.getSize().x / 2, window.getSize().y / 2));
-      }*/
+      camera.SetVecFront(direction.Normalize());*/
 
       switch (windowEvent.type) {
         case sf::Event::Closed:
@@ -192,98 +147,40 @@ int main() {
           if (windowEvent.key.code == sf::Keyboard::D) {
             camera.Move((camera.GetVecFront().GetVectorProductWith(camera.GetVecUp())).Normalize() * speed);
           }
-          break;
-        default:
+        case sf::Event::MouseMoved:
+          float xOffset = sf::Mouse::getPosition(window).x - xPos;
+          float yOffset = yPos - sf::Mouse::getPosition(window).y;
+          xPos = sf::Mouse::getPosition(window).x;
+          yPos = sf::Mouse::getPosition(window).y;
+
+          yaw += (xOffset * speed);
+          pitch += (yOffset * speed);
+
+          Vec3 front;
+          front[0] = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+          front[1] = sin(glm::radians(pitch));
+          front[2] = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+          camera.SetVecFront(front.Normalize());
           break;
       }
     }
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
 
-    // Рендеринг
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glBindTexture(GL_TEXTURE_2D, texture);
 
-    // Убеждаемся, что активировали шейдер прежде, чем настраивать
-    // uniform-переменные/объекты_рисования
-    lightingShader.use();
-    lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
-    lightingShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
-    lightingShader.setVec3("lightPos", lightPos);
-    lightingShader.setVec3("viewPos", camera.GetPosition());
-
-    lightingShader.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
-    lightingShader.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
-    lightingShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
-    lightingShader.setFloat("material.shininess", 32.0f);
-
-    lightingShader.setVec3("light.ambient",  0.2f, 0.2f, 0.2f);
-    lightingShader.setVec3("light.diffuse",  0.5f, 0.5f, 0.5f); // немного затемним рассеянный свет
-    lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
-
-    //glm::vec3 lightColor;
-    //auto ticks = clock.getElapsedTime().asSeconds();
-
-    //lightColor.x = sin(ticks * 2.0f);
-    //lightColor.y = sin(ticks * 0.7f);
-    //lightColor.z = sin(ticks * 1.3f);
-
-    //glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
-    //glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
-
-    // Преобразования Вида/Проекции
-    lightingShader.setMat4("projection", camera.GetProjectionMatrix());
-    lightingShader.setMat4("view", camera.GetViewMatrix());
-
-    // Мировое преобразование
-    Mat4 model = Mat4(1.0f);
-    lightingShader.setMat4("model", model);
-
-    // Рендеринг куба
-    glBindVertexArray(cubeVAO);
+    myShader.use();
     
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, wooden_full.GetTextureId());
+    glBindVertexArray(VAO);
 
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, wooden.GetTextureId());  
+    myShader.setMat4("model", Mat4::GetIdentityMatrix());
+    myShader.setMat4("view", camera.GetViewMatrix());
+    myShader.setMat4("projection", camera.GetProjectionMatrix());
 
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-
-    // Также отрисовываем наш объект-"лампочку"
-    lampShader.use();
-    lampShader.setMat4("projection", camera.GetProjectionMatrix());
-    lampShader.setMat4("view", camera.GetViewMatrix());
-    /*model = glm::mat4(1.0f);
-    model = glm::translate(model, lightPos);*/
-    model = Mat4::GetTranslated(lightPos);
-    model = Mat4::GetTranslated(Vec3(0.2f));
-    lampShader.setMat4("model", model);
-
-    glBindVertexArray(lightVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-
-    //glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    //glClear(GL_COLOR_BUFFER_BIT);
-
-    //myShader.use();
-
-    //glm::mat4 model = glm::mat4(1.0f);
-
-    //myShader.setMat4("model", model);
-    //myShader.setMat4("view", camera.GetViewMatrix());
-    //myShader.setMat4("projection", camera.GetProjectionMatrix());
-
-    //glBindVertexArray(VAO);
-
-    //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     window.display();
   }
-
-   // Опционально: освобождаем все ресурсы, как только они выполнили свое
-  // предназначение
-  glDeleteVertexArrays(1, &cubeVAO);
-  glDeleteVertexArrays(1, &lightVAO);
-  glDeleteBuffers(1, &VBO);
 
   window.close();
   return 0;
