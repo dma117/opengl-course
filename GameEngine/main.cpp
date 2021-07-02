@@ -57,7 +57,6 @@ int main() {
 
   //window.setMouseCursorVisible(false);
   //window.setMouseCursorGrabbed(true);
-  
 
   glewExperimental = GL_TRUE;
 
@@ -154,30 +153,25 @@ int main() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     glBindVertexArray(cubeVAO);
-
-    // Координатные атрибуты
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-	
-    // Атрибуты нормалей
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
-
-    // Атрибуты текстуры
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
     // 2. Настраиваем VAO света (VBO остается неизменным; вершины те же и для светового объекта, который также является 3D-кубом)
-    unsigned int lightVAO;
-    glGenVertexArrays(1, &lightVAO);
-    glBindVertexArray(lightVAO);
+    unsigned int lightCubeVAO;;
+    glGenVertexArrays(1, &lightCubeVAO);
+    glBindVertexArray(lightCubeVAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
     // Обратите внимание, что мы обновляем шаг атрибута положения лампы, чтобы отразить обновленные данные буфера
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-
+	
+    // Конфигурация шейдеров
     lightingShader.use();
     lightingShader.setInt("material.diffuse", 0);
     lightingShader.setInt("material.specular", 1);
@@ -194,11 +188,6 @@ int main() {
       direction.y = sin(glm::radians(pitch));
       direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
       camera.SetVecFront(glm::normalize(direction));
-
-
-     /* if (sf::Mouse::getPosition().x > window.getSize().x) {
-        sf::Mouse::setPosition(sf::Vector2i(window.getSize().x / 2, window.getSize().y / 2));
-      }*/
 
       switch (windowEvent.type) {
         case sf::Event::Closed:
@@ -230,78 +219,108 @@ int main() {
     // Убеждаемся, что активировали шейдер прежде, чем настраивать
     // uniform-переменные/объекты_рисования
     lightingShader.use();
-    lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
-    lightingShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
-    lightingShader.setVec3("lightPos", lightPos);
     lightingShader.setVec3("viewPos", camera.GetPosition());
-
-    lightingShader.setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
-    lightingShader.setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
-    lightingShader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
     lightingShader.setFloat("material.shininess", 32.0f);
 
-    lightingShader.setVec3("light.ambient",  0.2f, 0.2f, 0.2f);
-    lightingShader.setVec3("light.diffuse",  0.5f, 0.5f, 0.5f); // немного затемним рассеянный свет
-    lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+    // Направленный свет
+    lightingShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+    lightingShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+    lightingShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+    lightingShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
 
-    //glm::vec3 lightColor;
-    //auto ticks = clock.getElapsedTime().asSeconds();
+    // Точечный источник света №1
+    lightingShader.setVec3("pointLights[0].position", pointLightPositions[0]);
+    lightingShader.setVec3("pointLights[0].ambient", 0.05f, 0.05f, 0.05f);
+    lightingShader.setVec3("pointLights[0].diffuse", 0.8f, 0.8f, 0.8f);
+    lightingShader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
+    lightingShader.setFloat("pointLights[0].constant", 1.0f);
+    lightingShader.setFloat("pointLights[0].linear", 0.09);
+    lightingShader.setFloat("pointLights[0].quadratic", 0.032);
 
-    //lightColor.x = sin(ticks * 2.0f);
-    //lightColor.y = sin(ticks * 0.7f);
-    //lightColor.z = sin(ticks * 1.3f);
+    // Точечный источник света №2
+    lightingShader.setVec3("pointLights[1].position", pointLightPositions[1]);
+    lightingShader.setVec3("pointLights[1].ambient", 0.05f, 0.05f, 0.05f);
+    lightingShader.setVec3("pointLights[1].diffuse", 0.8f, 0.8f, 0.8f);
+    lightingShader.setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
+    lightingShader.setFloat("pointLights[1].constant", 1.0f);
+    lightingShader.setFloat("pointLights[1].linear", 0.09);
+    lightingShader.setFloat("pointLights[1].quadratic", 0.032);
 
-    //glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
-    //glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
+    // Точечный источник света №3
+    lightingShader.setVec3("pointLights[2].position", pointLightPositions[2]);
+    lightingShader.setVec3("pointLights[2].ambient", 0.05f, 0.05f, 0.05f);
+    lightingShader.setVec3("pointLights[2].diffuse", 0.8f, 0.8f, 0.8f);
+    lightingShader.setVec3("pointLights[2].specular", 1.0f, 1.0f, 1.0f);
+    lightingShader.setFloat("pointLights[2].constant", 1.0f);
+    lightingShader.setFloat("pointLights[2].linear", 0.09);
+    lightingShader.setFloat("pointLights[2].quadratic", 0.032);
 
-    // Преобразования Вида/Проекции
+    // Точечный источник света №4
+    lightingShader.setVec3("pointLights[3].position", pointLightPositions[3]);
+    lightingShader.setVec3("pointLights[3].ambient", 0.05f, 0.05f, 0.05f);
+    lightingShader.setVec3("pointLights[3].diffuse", 0.8f, 0.8f, 0.8f);
+    lightingShader.setVec3("pointLights[3].specular", 1.0f, 1.0f, 1.0f);
+    lightingShader.setFloat("pointLights[3].constant", 1.0f);
+    lightingShader.setFloat("pointLights[3].linear", 0.09);
+    lightingShader.setFloat("pointLights[3].quadratic", 0.032);
+
+    // Прожектор
+    lightingShader.setVec3("spotLight.position", camera.GetPosition());
+    lightingShader.setVec3("spotLight.direction", camera.GetVecFront());
+    lightingShader.setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
+    lightingShader.setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
+    lightingShader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
+    lightingShader.setFloat("spotLight.constant", 1.0f);
+    lightingShader.setFloat("spotLight.linear", 0.09);
+    lightingShader.setFloat("spotLight.quadratic", 0.032);
+    lightingShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+    lightingShader.setFloat("spotLight.outerCutOff",
+                            glm::cos(glm::radians(15.0f)));
+
     lightingShader.setMat4("projection", camera.GetProjectionMatrix());
     lightingShader.setMat4("view", camera.GetViewMatrix());
 
-    for (int i = 0; i < 10; i++) {
-      // Мировое преобразование
+    // Мировое преобразование
+    glm::mat4 model = glm::mat4(1.0f);
+    lightingShader.setMat4("model", model);
+
+    // Связывание диффузной карты
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, wooden_full.GetTextureId());
+
+    // Связывание карты отраженного цвета
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, wooden.GetTextureId());
+
+    // Рендеринг контейнеров
+    glBindVertexArray(cubeVAO);
+    for (unsigned int i = 0; i < 10; i++) {
+      // Вычисляем матрицу модели для каждого объекта и передаем её в шейдер
       glm::mat4 model = glm::mat4(1.0f);
       model = glm::translate(model, cubePositions[i]);
+      float angle = 20.0f * i;
+      model =
+          glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
       lightingShader.setMat4("model", model);
-
-      // Рендеринг куба
-      glBindVertexArray(cubeVAO);
-
-      glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, wooden_full.GetTextureId());
-
-      glActiveTexture(GL_TEXTURE1);
-      glBindTexture(GL_TEXTURE_2D, wooden.GetTextureId());
 
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
-    // Также отрисовываем наш объект-"лампочку"
+    // Также отрисовываем объект лампы
     lampShader.use();
     lampShader.setMat4("projection", camera.GetProjectionMatrix());
     lampShader.setMat4("view", camera.GetViewMatrix());
-    auto model = glm::mat4(1.0f);
-    model = glm::translate(model, lightPos);
-    model = glm::scale(model, glm::vec3(0.2f));  // куб меньшего размера
-    lampShader.setMat4("model", model);
 
-    glBindVertexArray(lightVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-
-    //glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    //glClear(GL_COLOR_BUFFER_BIT);
-
-    //myShader.use();
-
-    //glm::mat4 model = glm::mat4(1.0f);
-
-    //myShader.setMat4("model", model);
-    //myShader.setMat4("view", camera.GetViewMatrix());
-    //myShader.setMat4("projection", camera.GetProjectionMatrix());
-
-    //glBindVertexArray(VAO);
-
-    //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    // А теперь мы отрисовываем столько ламп, сколько у нас есть точечных
+    // источников света
+    glBindVertexArray(lightCubeVAO);
+    for (unsigned int i = 0; i < 4; i++) {
+      model = glm::mat4(1.0f);
+      model = glm::translate(model, pointLightPositions[i]);
+      model = glm::scale(model, glm::vec3(0.2f));  // меньший куб
+      lampShader.setMat4("model", model);
+      glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
 
     window.display();
   }
@@ -309,7 +328,7 @@ int main() {
    // Опционально: освобождаем все ресурсы, как только они выполнили свое
   // предназначение
   glDeleteVertexArrays(1, &cubeVAO);
-  glDeleteVertexArrays(1, &lightVAO);
+  glDeleteVertexArrays(1, &lightCubeVAO);
   glDeleteBuffers(1, &VBO);
 
   window.close();
