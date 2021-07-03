@@ -4,6 +4,8 @@
 #include <iostream>
 
 Texture::Texture(const char* path) {
+  unit = count++;
+
   glGenTextures(1, &id);
   int width, height, nrComponents;
   unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
@@ -33,9 +35,13 @@ Texture::Texture(const char* path) {
   }
 }
 
+int Texture::count{0};
+
 unsigned int Texture::GetTextureId() const {
-  return id; }
+  return id;
+}
 
 void Texture::Bind() {
-  glBindTexture(GL_TEXTURE_2D, id);  // TODO fix
+  glActiveTexture(GL_TEXTURE0 + unit);
+  glBindTexture(GL_TEXTURE_2D, id);
 }

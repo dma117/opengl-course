@@ -1,11 +1,9 @@
 ﻿#pragma once
 
 #include <GL/glew.h>
-
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <iostream>
-
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/mat4x4.hpp"
 #include "glm/vec3.hpp"
@@ -17,8 +15,6 @@
 bool firstMouseMovement = true;
 float lastX = 400, lastY = 300;
 float yaw = -90, pitch = 0;
-
-glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 void MouseMove(float xPos, float yPos) {
   if (firstMouseMovement) {
@@ -122,7 +118,7 @@ int main() {
   };
 	
 	
-    // Координаты всех контейнеров
+  // Координаты всех контейнеров
   glm::vec3 cubePositions[] = {
       glm::vec3(0.0f,  0.0f,  0.0f),
       glm::vec3(2.0f,  5.0f, -15.0f),
@@ -136,21 +132,22 @@ int main() {
       glm::vec3(-1.3f,  1.0f, -1.5f) 
   };
 
-    // Координаты точечных источников света
+  // Координаты точечных источников света
   glm::vec3 pointLightPositions[] = {
       glm::vec3(0.7f,  0.2f,  2.0f),
       glm::vec3(2.3f, -3.3f, -4.0f),
       glm::vec3(-4.0f,  2.0f, -12.0f),
       glm::vec3(0.0f,  0.0f, -3.0f)
   };
-        
-  // 1. Настраиваем VAO (и VBO) куба
-  unsigned int VBO, cubeVAO;
-  glGenVertexArrays(1, &cubeVAO);
+
+  unsigned int VBO;
   glGenBuffers(1, &VBO);
 
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  
+  unsigned int cubeVAO;
+  glGenVertexArrays(1, &cubeVAO);
 
   glBindVertexArray(cubeVAO);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
@@ -160,18 +157,15 @@ int main() {
   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
   glEnableVertexAttribArray(2);
 
-  // 2. Настраиваем VAO света (VBO остается неизменным; вершины те же и для светового объекта, который также является 3D-кубом)
-  unsigned int lightCubeVAO;;
+  unsigned int lightCubeVAO;
   glGenVertexArrays(1, &lightCubeVAO);
   glBindVertexArray(lightCubeVAO);
 
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-  // Обратите внимание, что мы обновляем шаг атрибута положения лампы, чтобы отразить обновленные данные буфера
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
 	
-  // Конфигурация шейдеров
   cubeLightingShader.use();
   cubeLightingShader.setInt("material.diffuse", 0);
   cubeLightingShader.setInt("material.specular", 1);
@@ -215,18 +209,15 @@ int main() {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Убеждаемся, что активировали шейдер прежде, чем настраивать
-    // uniform-переменные/объекты_рисования
     cubeLightingShader.use();
     cubeLightingShader.setVec3("viewPos", camera.GetPosition());
     cubeLightingShader.setFloat("material.shininess", 32.0f);
-
-    // Направленный свет
     cubeLightingShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
     cubeLightingShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
     cubeLightingShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
     cubeLightingShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
 
+    //источники света
     for (int i = 0; i < 4; i++) {
         cubeLightingShader.setVec3("pointLights[" + std::to_string(i) + "].position", pointLightPositions[0]);
         cubeLightingShader.setVec3("pointLights[" + std::to_string(i) + "].ambient", 0.05f, 0.05f, 0.05f);
@@ -237,7 +228,7 @@ int main() {
         cubeLightingShader.setFloat("pointLights[" + std::to_string(i) + "].quadratic", 0.032);
     }
 
-    // Прожектор
+    //прожектор
     cubeLightingShader.setVec3("spotLight.position", camera.GetPosition());
     cubeLightingShader.setVec3("spotLight.direction", camera.GetVecFront());
     cubeLightingShader.setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
@@ -252,18 +243,17 @@ int main() {
     cubeLightingShader.setMat4("view", camera.GetViewMatrix());
     cubeLightingShader.setMat4("model", glm::mat4(1.0f));
 
-    // Связывание диффузной карты
-    glActiveTexture(GL_TEXTURE0);
+    /*glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, wooden_full.GetTextureId());
 
-    // Связывание карты отраженного цвета
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, wooden.GetTextureId());
+    glBindTexture(GL_TEXTURE_2D, wooden.GetTextureId());*/
+    wooden_full.Bind();
+    wooden.Bind();
 
-    // Рендеринг контейнеров
     glBindVertexArray(cubeVAO);
+    //кубы
     for (unsigned int i = 0; i < 10; i++) {
-      // Вычисляем матрицу модели для каждого объекта и передаем её в шейдер
       glm::mat4 model = glm::mat4(1.0f);
       model = glm::translate(model, cubePositions[i]);
       float angle = 20.0f * i;
@@ -273,18 +263,16 @@ int main() {
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
-    // Также отрисовываем объект лампы
     lampShader.use();
     lampShader.setMat4("projection", camera.GetProjectionMatrix());
     lampShader.setMat4("view", camera.GetViewMatrix());
-
-    // А теперь мы отрисовываем столько ламп, сколько у нас есть точечных
-    // источников света
+    
+    //лампы
     glBindVertexArray(lightCubeVAO);
     for (unsigned int i = 0; i < 4; i++) {
       auto model = glm::mat4(1.0f);
       model = glm::translate(model, pointLightPositions[i]);
-      model = glm::scale(model, glm::vec3(0.2f));  // меньший куб
+      model = glm::scale(model, glm::vec3(0.2f));
       lampShader.setMat4("model", model);
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
