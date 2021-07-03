@@ -13,6 +13,7 @@
 #include "Texture.h"
 #include "VBO.h"
 #include "VAO.h"
+#include "EBO.h"
 
 bool firstMouseMovement = true;
 float lastX = 400, lastY = 300;
@@ -79,44 +80,53 @@ int main() {
         -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
          0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
          0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
         -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
 
         -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
          0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
          0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
         -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
 
         -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
         -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
         -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
         -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
          0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
          0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
          0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
          0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
         -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
          0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
          0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
         -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
 
         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
          0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
          0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f
+  };
+
+  unsigned int indices[] = {
+      0, 1, 2, 
+      0, 2, 3,
+
+
+      4, 5, 6,
+      4, 6, 7,
+
+      8, 9, 10,
+      8, 10, 11,
+
+      12, 13, 14,
+      12, 14, 15,
+
+      16, 17, 18,
+      16, 18, 19,
+
+      20, 21, 22,
+      20, 22, 23
   };
 	
 	
@@ -145,12 +155,20 @@ int main() {
   VBO mainVBO(vertices, sizeof(vertices) / sizeof(float));
   
   VAO cubeVAO;
+  VAO lightCubeVAO;
+
   cubeVAO.Bind();
+
+  EBO cubeEBO(indices, sizeof(indices) / sizeof(unsigned int));
+
   cubeVAO.EnableArray(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
   cubeVAO.EnableArray(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
   cubeVAO.EnableArray(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 
-  VAO lightCubeVAO;
+  lightCubeVAO.Bind();
+  
+  cubeEBO.Bind();
+
   lightCubeVAO.EnableArray(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 
   mainVBO.Bind();
@@ -244,7 +262,8 @@ int main() {
       model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
       cubeLightingShader.setMat4("model", model);
 
-      glDrawArrays(GL_TRIANGLES, 0, 36);
+      /*glDrawArrays(GL_TRIANGLES, 0, 36);*/
+      glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, (void*)0);
     }
 
     lampShader.use();
@@ -258,7 +277,12 @@ int main() {
       model = glm::translate(model, pointLightPositions[i]);
       model = glm::scale(model, glm::vec3(0.2f));
       lampShader.setMat4("model", model);
-      glDrawArrays(GL_TRIANGLES, 0, 36);
+      /*glDrawArrays(GL_TRIANGLES, 0, 36);*/
+      glDrawElements(GL_TRIANGLES,     // mode
+                     36,               // count
+                     GL_UNSIGNED_INT,  // type
+                     (void*)0          // element array buffer offset
+      );
     }
 
     window.display();
