@@ -11,6 +11,8 @@
 #include "Shader.h"
 #include "stb_image.h"
 #include "Texture.h"
+#include "VBO.h"
+#include "VAO.h"
 
 bool firstMouseMovement = true;
 float lastX = 400, lastY = 300;
@@ -140,31 +142,18 @@ int main() {
       glm::vec3(0.0f,  0.0f, -3.0f)
   };
 
-  unsigned int VBO;
-  glGenBuffers(1, &VBO);
-
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  VBO mainVBO(vertices, sizeof(vertices) / sizeof(float));
   
-  unsigned int cubeVAO;
-  glGenVertexArrays(1, &cubeVAO);
+  VAO cubeVAO;
+  cubeVAO.Bind();
+  cubeVAO.EnableArray(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+  cubeVAO.EnableArray(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+  cubeVAO.EnableArray(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 
-  glBindVertexArray(cubeVAO);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-  glEnableVertexAttribArray(2);
+  VAO lightCubeVAO;
+  lightCubeVAO.EnableArray(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 
-  unsigned int lightCubeVAO;
-  glGenVertexArrays(1, &lightCubeVAO);
-  glBindVertexArray(lightCubeVAO);
-
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(0);
+  mainVBO.Bind();
 	
   cubeLightingShader.use();
   cubeLightingShader.setInt("material.diffuse", 0);
@@ -243,15 +232,10 @@ int main() {
     cubeLightingShader.setMat4("view", camera.GetViewMatrix());
     cubeLightingShader.setMat4("model", glm::mat4(1.0f));
 
-    /*glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, wooden_full.GetTextureId());
-
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, wooden.GetTextureId());*/
     wooden_full.Bind();
     wooden.Bind();
 
-    glBindVertexArray(cubeVAO);
+    cubeVAO.Bind();
     //кубы
     for (unsigned int i = 0; i < 10; i++) {
       glm::mat4 model = glm::mat4(1.0f);
@@ -268,7 +252,7 @@ int main() {
     lampShader.setMat4("view", camera.GetViewMatrix());
     
     //лампы
-    glBindVertexArray(lightCubeVAO);
+    lightCubeVAO.Bind();
     for (unsigned int i = 0; i < 4; i++) {
       auto model = glm::mat4(1.0f);
       model = glm::translate(model, pointLightPositions[i]);
@@ -279,10 +263,6 @@ int main() {
 
     window.display();
   }
-
-  glDeleteVertexArrays(1, &cubeVAO);
-  glDeleteVertexArrays(1, &lightCubeVAO);
-  glDeleteBuffers(1, &VBO);
 
   window.close();
   return 0;
