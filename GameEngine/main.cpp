@@ -93,50 +93,6 @@ int main() {
     return -1;
   }
 
-  glEnable(GL_DEPTH_TEST);
-
-  Shader myShader("res/shaders/e4.vs", "res/shaders/e4.fs");
-  Shader cubeLightingShader("res/shaders/colors.vs", "res/shaders/colors.fs");
-  Shader lampShader("res/shaders/lamp.vs", "res/shaders/lamp.fs");
-
-  Camera camera;
-  float speed = 0.1;
-  Texture wooden_full("res/imgs/wooden_full.png");
-  Texture wooden("res/imgs/wooden.png");
-
-  float vertices[] = {
-         // координаты        // нормали           // текстурные координаты
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
-
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f
-  };
-
   unsigned int indices[] = {
       0, 1, 2, 
       0, 2, 3,
@@ -156,104 +112,75 @@ int main() {
       20, 21, 22,
       20, 22, 23
   };
-	
-	
-  // Координаты всех контейнеров
-  glm::vec3 cubePositions[] = {
-      glm::vec3(0.0f,  0.0f,  0.0f),
-      glm::vec3(2.0f,  5.0f, -15.0f),
-      glm::vec3(-1.5f, -2.2f, -2.5f),
-      glm::vec3(-3.8f, -2.0f, -12.3f),
-      glm::vec3(2.4f, -0.4f, -3.5f),
-      glm::vec3(-1.7f,  3.0f, -7.5f),
-      glm::vec3(1.3f, -2.0f, -2.5f),
-      glm::vec3(1.5f,  2.0f, -2.5f),
-      glm::vec3(1.5f,  0.2f, -1.5f),
-      glm::vec3(-1.3f,  1.0f, -1.5f) 
-  };
 
   // Координаты точечных источников света
-  glm::vec3 pointLightPositions[] = {
+  glm::vec3 modelPositions[] = {
       glm::vec3(0.7f,  0.2f,  2.0f),
       glm::vec3(2.3f, -3.3f, -4.0f),
       glm::vec3(-4.0f,  2.0f, -12.0f),
       glm::vec3(0.0f,  0.0f, -3.0f)
   };
 
-  float skyboxVertices[] = {        
-    -1.0f,  1.0f, -1.0f,
-    -1.0f, -1.0f, -1.0f,
-     1.0f, -1.0f, -1.0f,
-     1.0f, -1.0f, -1.0f,
-     1.0f,  1.0f, -1.0f,
-    -1.0f,  1.0f, -1.0f,
+  float skyboxVertices[] = {
+	-1.0f, 1.0f, -1.0f,
+	-1.0f, 1.0f, 1.0f,
+     1.0f, 1.0f, -1.0f,
+	 1.0f, 1.0f, 1.0f,
 
-    -1.0f, -1.0f,  1.0f,
-    -1.0f, -1.0f, -1.0f,
-    -1.0f,  1.0f, -1.0f,
-    -1.0f,  1.0f, -1.0f,
-    -1.0f,  1.0f,  1.0f,
-    -1.0f, -1.0f,  1.0f,
-
-     1.0f, -1.0f, -1.0f,
-     1.0f, -1.0f,  1.0f,
-     1.0f,  1.0f,  1.0f,
-     1.0f,  1.0f,  1.0f,
-     1.0f,  1.0f, -1.0f,
-     1.0f, -1.0f, -1.0f,
-
-    -1.0f, -1.0f,  1.0f,
-    -1.0f,  1.0f,  1.0f,
-     1.0f,  1.0f,  1.0f,
-     1.0f,  1.0f,  1.0f,
-     1.0f, -1.0f,  1.0f,
-    -1.0f, -1.0f,  1.0f,
-
-    -1.0f,  1.0f, -1.0f,
-     1.0f,  1.0f, -1.0f,
-     1.0f,  1.0f,  1.0f,
-     1.0f,  1.0f,  1.0f,
-    -1.0f,  1.0f,  1.0f,
-    -1.0f,  1.0f, -1.0f,
-
-    -1.0f, -1.0f, -1.0f,
-    -1.0f, -1.0f,  1.0f,
-     1.0f, -1.0f, -1.0f,
-     1.0f, -1.0f, -1.0f,
-    -1.0f, -1.0f,  1.0f,
-     1.0f, -1.0f,  1.0f
-};
-
-   vector<std::string> faces = {
-    "res/skyboxes/sky/right.jpg",
-    "res/skyboxes/sky/left.jpg",
-    "res/skyboxes/sky/top.jpg",
-    "res/skyboxes/sky/bottom.jpg",
-    "res/skyboxes/sky/front.jpg",
-    "res/skyboxes/sky/back.jpg"
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f, 1.0f,
+	 1.0f, -1.0f, -1.0f,
+   	 1.0f, -1.0f, 1.0f,
   };
 
-   Shader skyboxShader("res/shaders/skybox.vs", "res/shaders/skybox.fs");
-   unsigned int cubemapTexture = loadCubemap(faces);
+  unsigned int skyboxIndices[] = {
+  	0, 1, 2,
+	1, 2, 3,
 
-   // Сообщаем stb_image.h, чтобы он перевернул загруженные текстуры относительно
-  // y-оси (до загрузки модели)
+	4, 5, 6,
+	5, 6, 7,
+
+	0, 1, 5,
+	0, 4, 5,
+
+	2, 3, 7,
+	2, 6, 7,
+
+	0, 2, 6,
+	0, 4, 6,
+
+	1, 5, 7,
+	1, 3, 7
+  };
+
+
+  std::vector<std::string> faces = {
+   "res/skyboxes/sky/right.jpg",
+   "res/skyboxes/sky/left.jpg",
+   "res/skyboxes/sky/top.jpg",
+   "res/skyboxes/sky/bottom.jpg",
+   "res/skyboxes/sky/front.jpg",
+   "res/skyboxes/sky/back.jpg"
+  };
+
+  Shader skyboxShader("res/shaders/skybox.vs", "res/shaders/skybox.fs");
+  Shader modelShader("res/shaders/model.vs", "res/shaders/model.fs");
+  Model ourModel("res/3d_models/backpack.obj");
+
+  unsigned int cubemapTexture = loadCubemap(faces);
+  
+  Camera camera;
+  float speed = 0.1;
+  
   stbi_set_flip_vertically_on_load(true);
 
-  // Конфигурирование глобального состояния OpenGL
   glEnable(GL_DEPTH_TEST);
-
-  // Компилирование нашей шейдерной программы
-  Shader ourShader("res/shaders/model.vs", "res/shaders/model.fs");
-
-  // Загрузка моделей
-  Model ourModel("res/3d_models/backpack.obj");
 
   VBO skyboxVBO(skyboxVertices, sizeof(skyboxVertices) / sizeof(float));
   VAO skyboxVAO;
+  EBO skyboxEBO(skyboxIndices, sizeof(skyboxIndices) / sizeof(unsigned int));
+  skyboxVAO.EnableArray(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
   skyboxVBO.Bind();
-  skyboxVAO.EnableArray(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
-                                    (void*)0);
 
   skyboxShader.use();
   skyboxShader.setInt("skybox", 0);
@@ -296,35 +223,27 @@ int main() {
     glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // Убеждаемся, что активировали шейдер прежде, чем настраивать
-    // uniform-переменные/объекты_рисования
-    ourShader.use();
+    modelShader.use();
+    modelShader.setMat4("projection", camera.GetProjectionMatrix());
+    modelShader.setMat4("view", camera.GetViewMatrix());
 
     for (int i = 0; i < 4; i++) {
-          // Преобразования Вида/Проекции
-        glm::mat4 view = camera.GetViewMatrix();
-        ourShader.setMat4("projection", camera.GetProjectionMatrix());
-        ourShader.setMat4("view", view);
-
-        // Рендеринг загруженной модели
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, pointLightPositions[i]);  // смещаем вниз чтобы быть в центре сцены
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));  // объект слишком большой для нашей
-                                           // сцены, поэтому немного уменьшим его
-        ourShader.setMat4("model", model);
-        ourModel.Render(ourShader);
+        model = glm::translate(model, modelPositions[i]);
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+        modelShader.setMat4("model", model);
+        ourModel.Draw(modelShader);
     }
 
     glDepthFunc(GL_LEQUAL);
     skyboxShader.use();
-    auto view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
-    skyboxShader.setMat4("view", view);
+    skyboxShader.setMat4("view", glm::mat4(glm::mat3(camera.GetViewMatrix())));
     skyboxShader.setMat4("projection", camera.GetProjectionMatrix());
 
     skyboxVAO.Bind();
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, (void*)0);
     glBindVertexArray(0);
     glDepthFunc(GL_LESS);
 
