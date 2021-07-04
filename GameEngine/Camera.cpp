@@ -36,3 +36,13 @@ void Camera::SetVecFront(const Vec3& new_vec_front) {
 void Camera::Translate(const Vec3& offset) {
   position_ += offset;
 }
+
+Mat4 Camera::GetViewMat3() {
+  Mat4 result = GetViewMatrix();
+  result[3][0] = 0;
+  result[3][1] = 0;
+  result[3][2] = 0;
+  result[3][3] = 0;
+
+  return result;
+}

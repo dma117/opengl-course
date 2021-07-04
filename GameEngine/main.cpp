@@ -79,8 +79,8 @@ int main() {
   settings.minorVersion = 3;
   settings.attributeFlags = sf::ContextSettings::Core;
 
-  sf::RenderWindow window(sf::VideoMode(800, 600, 32), "First Window",
-                          sf::Style::Titlebar | sf::Style::Close);
+  sf::RenderWindow window(sf::VideoMode(1920, 1080, 32), "First Window",
+                          sf::Style::Titlebar | sf::Style::Close, settings);
 
   //window.setMouseCursorVisible(false);
   //window.setMouseCursorGrabbed(true);
@@ -214,7 +214,7 @@ int main() {
 
     glDepthFunc(GL_LEQUAL);
     skyboxShader.use();
-    skyboxShader.setMat4("view", glm::mat4(glm::mat3(camera.GetViewMatrix())));
+    skyboxShader.setMat4("view", camera.GetViewMat3());
     skyboxShader.setMat4("projection", camera.GetProjectionMatrix());
 
     skyboxVAO.Bind();

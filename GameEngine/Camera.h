@@ -14,6 +14,8 @@ class Camera {
   void SetVecFront(const Vec3&); 
 
   void Translate(const Vec3&);
+
+  Mat4 GetViewMat3();
  private:
   Vec3 position_;
   Vec3 vec_up_;
