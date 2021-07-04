@@ -2,17 +2,16 @@
 
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
-
 #include <assimp/Importer.hpp>
 #include <fstream>
 #include <iostream>
 #include <map>
 #include <sstream>
 #include <string>
-
 #include "Mesh.h"
 #include "Shader.h"
 #include "stb_image.h"
+#include "math.h"
 
 
 class Model {

@@ -45,6 +45,8 @@ void MouseMove(float xPos, float yPos) {
 }
 
 unsigned int loadCubemap(std::vector<std::string> faces) {
+  stbi_set_flip_vertically_on_load(false);
+
   unsigned int textureID;
   glGenTextures(1, &textureID);
   glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
@@ -93,27 +95,6 @@ int main() {
     return -1;
   }
 
-  unsigned int indices[] = {
-      0, 1, 2, 
-      0, 2, 3,
-
-      4, 5, 6,
-      4, 6, 7,
-
-      8, 9, 10,
-      8, 10, 11,
-
-      12, 13, 14,
-      12, 14, 15,
-
-      16, 17, 18,
-      16, 18, 19,
-
-      20, 21, 22,
-      20, 22, 23
-  };
-
-  // Координаты точечных источников света
   glm::vec3 modelPositions[] = {
       glm::vec3(0.7f,  0.2f,  2.0f),
       glm::vec3(2.3f, -3.3f, -4.0f),
@@ -163,6 +144,8 @@ int main() {
    "res/skyboxes/sky/back.jpg"
   };
 
+  stbi_set_flip_vertically_on_load(true);
+
   Shader skyboxShader("res/shaders/skybox.vs", "res/shaders/skybox.fs");
   Shader modelShader("res/shaders/model.vs", "res/shaders/model.fs");
   Model ourModel("res/3d_models/backpack.obj");
@@ -172,8 +155,6 @@ int main() {
   Camera camera;
   float speed = 0.1;
   
-  stbi_set_flip_vertically_on_load(true);
-
   glEnable(GL_DEPTH_TEST);
 
   VBO skyboxVBO(skyboxVertices, sizeof(skyboxVertices) / sizeof(float));

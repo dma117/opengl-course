@@ -2,16 +2,14 @@
 
 #include <string>
 #include <vector>
-#include "glm/vec2.hpp"
-#include "glm/vec3.hpp"
 #include "Shader.h"
 
 struct Vertex {
-  glm::vec3 Position;
-  glm::vec3 Normal;
-  glm::vec2 TexCoords;
-  glm::vec3 Tangent;
-  glm::vec3 Bitangent;
+  Vec3 Position;
+  Vec3 Normal;
+  Vec2 TexCoords;
+  Vec3 Tangent;
+  Vec3 Bitangent;
 };
 
 struct MeshTexture {

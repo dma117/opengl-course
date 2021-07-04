@@ -42,35 +42,35 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene) {
 
   for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
     Vertex vertex;
-    glm::vec3 vector;
+    Vec3 vector;
 
-    vector.x = mesh->mVertices[i].x;
-    vector.y = mesh->mVertices[i].y;
-    vector.z = mesh->mVertices[i].z;
+    vector[0] = mesh->mVertices[i][0];
+    vector[1] = mesh->mVertices[i][1];
+    vector[2] = mesh->mVertices[i][2];
     vertex.Position = vector;
 
-    vector.x = mesh->mNormals[i].x;
-    vector.y = mesh->mNormals[i].y;
-    vector.z = mesh->mNormals[i].z;
+    vector[0] = mesh->mNormals[i][0];
+    vector[1] = mesh->mNormals[i][1];
+    vector[2] = mesh->mNormals[i][2];
     vertex.Normal = vector;
 
     if (mesh->mTextureCoords[0]) {
-      glm::vec2 vec;
+      Vec2 vec;
 
-      vec.x = mesh->mTextureCoords[0][i].x;
-      vec.y = mesh->mTextureCoords[0][i].y;
+      vec[0] = mesh->mTextureCoords[0][i][0];
+      vec[1] = mesh->mTextureCoords[0][i][1];
       vertex.TexCoords = vec;
     } else
-      vertex.TexCoords = glm::vec2(0.0f, 0.0f);
+      vertex.TexCoords = Vec2(0.0f, 0.0f);
 
-    vector.x = mesh->mTangents[i].x;
-    vector.y = mesh->mTangents[i].y;
-    vector.z = mesh->mTangents[i].z;
+    vector[0] = mesh->mTangents[i][0];
+    vector[1] = mesh->mTangents[i][1];
+    vector[2] = mesh->mTangents[i][2];
     vertex.Tangent = vector;
 
-    vector.x = mesh->mBitangents[i].x;
-    vector.y = mesh->mBitangents[i].y;
-    vector.z = mesh->mBitangents[i].z;
+    vector[0] = mesh->mBitangents[i][0];
+    vector[1] = mesh->mBitangents[i][1];
+    vector[2] = mesh->mBitangents[i][2];
     vertex.Bitangent = vector;
     vertices.push_back(vertex);
   }
