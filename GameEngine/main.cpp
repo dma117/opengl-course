@@ -14,6 +14,7 @@
 #include "VBO.h"
 #include "VAO.h"
 #include "EBO.h"
+#include "Model.h"
 
 bool firstMouseMovement = true;
 float lastX = 400, lastY = 300;
@@ -151,30 +152,18 @@ int main() {
       glm::vec3(0.0f,  0.0f, -3.0f)
   };
 
-  VBO mainVBO(vertices, sizeof(vertices) / sizeof(float));
-  
-  VAO cubeVAO;
-  VAO lightCubeVAO;
+   // Сообщаем stb_image.h, чтобы он перевернул загруженные текстуры относительно
+  // y-оси (до загрузки модели)
+  stbi_set_flip_vertically_on_load(true);
 
-  cubeVAO.Bind();
+  // Конфигурирование глобального состояния OpenGL
+  glEnable(GL_DEPTH_TEST);
 
-  EBO cubeEBO(indices, sizeof(indices) / sizeof(unsigned int));
+  // Компилирование нашей шейдерной программы
+  Shader ourShader("res/shaders/model.vs", "res/shaders/model.fs");
 
-  cubeVAO.EnableArray(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-  cubeVAO.EnableArray(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-  cubeVAO.EnableArray(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-
-  lightCubeVAO.Bind();
-  
-  cubeEBO.Bind();
-
-  lightCubeVAO.EnableArray(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-
-  mainVBO.Bind();
-	
-  cubeLightingShader.use();
-  cubeLightingShader.setInt("material.diffuse", 0);
-  cubeLightingShader.setInt("material.specular", 1);
+  // Загрузка моделей
+  Model ourModel("res/3d_models/backpack.obj");
 
   bool isGo = true;
   while (isGo) {
@@ -211,78 +200,29 @@ int main() {
           break;
       }
     }
-
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    cubeLightingShader.use();
-    cubeLightingShader.setVec3("viewPos", camera.GetPosition());
-    cubeLightingShader.setFloat("material.shininess", 32.0f);
-    cubeLightingShader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
-    cubeLightingShader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
-    cubeLightingShader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
-    cubeLightingShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+    // Убеждаемся, что активировали шейдер прежде, чем настраивать
+    // uniform-переменные/объекты_рисования
+    ourShader.use();
 
-    //источники света
-    for (int i = 0; i < 4; i++) {
-        cubeLightingShader.setVec3("pointLights[" + std::to_string(i) + "].position", pointLightPositions[0]);
-        cubeLightingShader.setVec3("pointLights[" + std::to_string(i) + "].ambient", 0.05f, 0.05f, 0.05f);
-        cubeLightingShader.setVec3("pointLights[" + std::to_string(i) + "].diffuse", 0.8f, 0.8f, 0.8f);
-        cubeLightingShader.setVec3("pointLights[" + std::to_string(i) + "].specular", 1.0f, 1.0f, 1.0f);
-        cubeLightingShader.setFloat("pointLights[" + std::to_string(i) + "].constant", 1.0f);
-        cubeLightingShader.setFloat("pointLights[" + std::to_string(i) + "].linear", 0.09);
-        cubeLightingShader.setFloat("pointLights[" + std::to_string(i) + "].quadratic", 0.032);
-    }
+    // Преобразования Вида/Проекции
+    glm::mat4 view = camera.GetViewMatrix();
+    ourShader.setMat4("projection", camera.GetProjectionMatrix());
+    ourShader.setMat4("view", view);
 
-    //прожектор
-    cubeLightingShader.setVec3("spotLight.position", camera.GetPosition());
-    cubeLightingShader.setVec3("spotLight.direction", camera.GetVecFront());
-    cubeLightingShader.setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
-    cubeLightingShader.setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
-    cubeLightingShader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
-    cubeLightingShader.setFloat("spotLight.constant", 1.0f);
-    cubeLightingShader.setFloat("spotLight.linear", 0.09);
-    cubeLightingShader.setFloat("spotLight.quadratic", 0.032);
-    cubeLightingShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
-    cubeLightingShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
-    cubeLightingShader.setMat4("projection", camera.GetProjectionMatrix());
-    cubeLightingShader.setMat4("view", camera.GetViewMatrix());
-    cubeLightingShader.setMat4("model", glm::mat4(1.0f));
-
-    wooden_full.Bind();
-    wooden.Bind();
-
-    cubeVAO.Bind();
-    //кубы
-    for (unsigned int i = 0; i < 10; i++) {
-      glm::mat4 model = glm::mat4(1.0f);
-      model = glm::translate(model, cubePositions[i]);
-      float angle = 20.0f * i;
-      model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-      cubeLightingShader.setMat4("model", model);
-
-      /*glDrawArrays(GL_TRIANGLES, 0, 36);*/
-      glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, (void*)0);
-    }
-
-    lampShader.use();
-    lampShader.setMat4("projection", camera.GetProjectionMatrix());
-    lampShader.setMat4("view", camera.GetViewMatrix());
-    
-    //лампы
-    lightCubeVAO.Bind();
-    for (unsigned int i = 0; i < 4; i++) {
-      auto model = glm::mat4(1.0f);
-      model = glm::translate(model, pointLightPositions[i]);
-      model = glm::scale(model, glm::vec3(0.2f));
-      lampShader.setMat4("model", model);
-      /*glDrawArrays(GL_TRIANGLES, 0, 36);*/
-      glDrawElements(GL_TRIANGLES,     // mode
-                     36,               // count
-                     GL_UNSIGNED_INT,  // type
-                     (void*)0          // element array buffer offset
-      );
-    }
+    // Рендеринг загруженной модели
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(
+        model,
+        glm::vec3(0.0f, 0.0f, 0.0f));  // смещаем вниз чтобы быть в центре сцены
+    model = glm::scale(
+        model,
+        glm::vec3(1.0f, 1.0f, 1.0f));  // объект слишком большой для нашей
+                                       // сцены, поэтому немного уменьшим его
+    ourShader.setMat4("model", model);
+    ourModel.Render(ourShader);
 
     window.display();
   }
