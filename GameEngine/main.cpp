@@ -44,6 +44,34 @@ void MouseMove(float xPos, float yPos) {
   if (pitch < -70.0f) pitch = -70.0f;
 }
 
+unsigned int loadCubemap(std::vector<std::string> faces) {
+  unsigned int textureID;
+  glGenTextures(1, &textureID);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+  int width, height, nrChannels;
+  for (unsigned int i = 0; i < faces.size(); i++) {
+    unsigned char* data =
+        stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+    if (data) {
+      glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height,
+                   0, GL_RGB, GL_UNSIGNED_BYTE, data);
+      stbi_image_free(data);
+    } else {
+      std::cout << "Cubemap texture failed to load at path: " << faces[i]
+                << std::endl;
+      stbi_image_free(data);
+    }
+  }
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+  return textureID;
+}
+
 int main() {
   sf::ContextSettings settings;
   settings.depthBits = 24;
@@ -152,6 +180,62 @@ int main() {
       glm::vec3(0.0f,  0.0f, -3.0f)
   };
 
+  float skyboxVertices[] = {        
+    -1.0f,  1.0f, -1.0f,
+    -1.0f, -1.0f, -1.0f,
+     1.0f, -1.0f, -1.0f,
+     1.0f, -1.0f, -1.0f,
+     1.0f,  1.0f, -1.0f,
+    -1.0f,  1.0f, -1.0f,
+
+    -1.0f, -1.0f,  1.0f,
+    -1.0f, -1.0f, -1.0f,
+    -1.0f,  1.0f, -1.0f,
+    -1.0f,  1.0f, -1.0f,
+    -1.0f,  1.0f,  1.0f,
+    -1.0f, -1.0f,  1.0f,
+
+     1.0f, -1.0f, -1.0f,
+     1.0f, -1.0f,  1.0f,
+     1.0f,  1.0f,  1.0f,
+     1.0f,  1.0f,  1.0f,
+     1.0f,  1.0f, -1.0f,
+     1.0f, -1.0f, -1.0f,
+
+    -1.0f, -1.0f,  1.0f,
+    -1.0f,  1.0f,  1.0f,
+     1.0f,  1.0f,  1.0f,
+     1.0f,  1.0f,  1.0f,
+     1.0f, -1.0f,  1.0f,
+    -1.0f, -1.0f,  1.0f,
+
+    -1.0f,  1.0f, -1.0f,
+     1.0f,  1.0f, -1.0f,
+     1.0f,  1.0f,  1.0f,
+     1.0f,  1.0f,  1.0f,
+    -1.0f,  1.0f,  1.0f,
+    -1.0f,  1.0f, -1.0f,
+
+    -1.0f, -1.0f, -1.0f,
+    -1.0f, -1.0f,  1.0f,
+     1.0f, -1.0f, -1.0f,
+     1.0f, -1.0f, -1.0f,
+    -1.0f, -1.0f,  1.0f,
+     1.0f, -1.0f,  1.0f
+};
+
+   vector<std::string> faces = {
+    "res/skyboxes/sky/right.jpg",
+    "res/skyboxes/sky/left.jpg",
+    "res/skyboxes/sky/top.jpg",
+    "res/skyboxes/sky/bottom.jpg",
+    "res/skyboxes/sky/front.jpg",
+    "res/skyboxes/sky/back.jpg"
+  };
+
+   Shader skyboxShader("res/shaders/skybox.vs", "res/shaders/skybox.fs");
+   unsigned int cubemapTexture = loadCubemap(faces);
+
    // Сообщаем stb_image.h, чтобы он перевернул загруженные текстуры относительно
   // y-оси (до загрузки модели)
   stbi_set_flip_vertically_on_load(true);
@@ -164,6 +248,15 @@ int main() {
 
   // Загрузка моделей
   Model ourModel("res/3d_models/backpack.obj");
+
+  VBO skyboxVBO(skyboxVertices, sizeof(skyboxVertices) / sizeof(float));
+  VAO skyboxVAO;
+  skyboxVBO.Bind();
+  skyboxVAO.EnableArray(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float),
+                                    (void*)0);
+
+  skyboxShader.use();
+  skyboxShader.setInt("skybox", 0);
 
   bool isGo = true;
   while (isGo) {
@@ -207,22 +300,33 @@ int main() {
     // uniform-переменные/объекты_рисования
     ourShader.use();
 
-    // Преобразования Вида/Проекции
-    glm::mat4 view = camera.GetViewMatrix();
-    ourShader.setMat4("projection", camera.GetProjectionMatrix());
-    ourShader.setMat4("view", view);
+    for (int i = 0; i < 4; i++) {
+          // Преобразования Вида/Проекции
+        glm::mat4 view = camera.GetViewMatrix();
+        ourShader.setMat4("projection", camera.GetProjectionMatrix());
+        ourShader.setMat4("view", view);
 
-    // Рендеринг загруженной модели
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(
-        model,
-        glm::vec3(0.0f, 0.0f, 0.0f));  // смещаем вниз чтобы быть в центре сцены
-    model = glm::scale(
-        model,
-        glm::vec3(1.0f, 1.0f, 1.0f));  // объект слишком большой для нашей
-                                       // сцены, поэтому немного уменьшим его
-    ourShader.setMat4("model", model);
-    ourModel.Render(ourShader);
+        // Рендеринг загруженной модели
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, pointLightPositions[i]);  // смещаем вниз чтобы быть в центре сцены
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));  // объект слишком большой для нашей
+                                           // сцены, поэтому немного уменьшим его
+        ourShader.setMat4("model", model);
+        ourModel.Render(ourShader);
+    }
+
+    glDepthFunc(GL_LEQUAL);
+    skyboxShader.use();
+    auto view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
+    skyboxShader.setMat4("view", view);
+    skyboxShader.setMat4("projection", camera.GetProjectionMatrix());
+
+    skyboxVAO.Bind();
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glBindVertexArray(0);
+    glDepthFunc(GL_LESS);
 
     window.display();
   }
