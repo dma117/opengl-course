@@ -39,9 +39,6 @@ void MouseMove(float xPos, float yPos) {
 
   yaw += xoffset;
   pitch += yoffset;
-
-  if (pitch > 70.0f) pitch = 70.0f;
-  if (pitch < -70.0f) pitch = -70.0f;
 }
 
 unsigned int loadCubemap(std::vector<std::string> faces) {
@@ -77,13 +74,13 @@ unsigned int loadCubemap(std::vector<std::string> faces) {
 int main() {
   sf::ContextSettings settings;
   settings.depthBits = 24;
-  settings.stencilBits = 8; 
+  settings.stencilBits = 8;
   settings.majorVersion = 4;
   settings.minorVersion = 3;
   settings.attributeFlags = sf::ContextSettings::Core;
 
-  sf::RenderWindow window(sf::VideoMode(1920, 1080, 32), "First Window",
-                          sf::Style::Titlebar | sf::Style::Close, settings);
+  sf::RenderWindow window(sf::VideoMode(800, 600, 32), "First Window",
+                          sf::Style::Titlebar | sf::Style::Close);
 
   //window.setMouseCursorVisible(false);
   //window.setMouseCursorGrabbed(true);
@@ -105,33 +102,33 @@ int main() {
   float skyboxVertices[] = {
 	-1.0f, 1.0f, -1.0f,
 	-1.0f, 1.0f, 1.0f,
-     1.0f, 1.0f, -1.0f,
+   1.0f, 1.0f, -1.0f,
 	 1.0f, 1.0f, 1.0f,
 
 	-1.0f, -1.0f, -1.0f,
 	-1.0f, -1.0f, 1.0f,
 	 1.0f, -1.0f, -1.0f,
-   	 1.0f, -1.0f, 1.0f,
+   1.0f, -1.0f, 1.0f,
   };
 
   unsigned int skyboxIndices[] = {
-  	0, 1, 2,
-	1, 2, 3,
+    0, 1, 2,
+    1, 2, 3,
 
-	4, 5, 6,
-	5, 6, 7,
+    4, 5, 6,
+    5, 6, 7,
 
-	0, 1, 5,
-	0, 4, 5,
+    0, 1, 5,
+    0, 4, 5,
 
-	2, 3, 7,
-	2, 6, 7,
+    2, 3, 7,
+    2, 6, 7,
 
-	0, 2, 6,
-	0, 4, 6,
+    0, 2, 6,
+    0, 4, 6,
 
-	1, 5, 7,
-	1, 3, 7
+    1, 5, 7,
+    1, 3, 7
   };
 
 
@@ -170,14 +167,14 @@ int main() {
   while (isGo) {
     sf::Event windowEvent;
     while (window.pollEvent(windowEvent)) {
-      auto mouse_position = sf::Mouse::getPosition(); 
+      auto mouse_position = sf::Mouse::getPosition(window); 
       MouseMove(mouse_position.x, mouse_position.y);
 
-      glm::vec3 direction;
-      direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-      direction.y = sin(glm::radians(pitch));
-      direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-      camera.SetVecFront(glm::normalize(direction));
+      Vec3 direction;
+      direction[0] = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+      direction[1] = sin(glm::radians(pitch));
+      direction[2] = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+      camera.SetVecFront(direction.Normalize());
 
       switch (windowEvent.type) {
         case sf::Event::Closed:
@@ -185,18 +182,17 @@ int main() {
           break;
         case sf::Event::KeyPressed:
           if (windowEvent.key.code == sf::Keyboard::A) {
-            camera.Move(-glm::normalize(glm::cross(camera.GetVecFront(), camera.GetVecUp())) * speed);
+            camera.Translate((camera.GetVecFront().GetVectorProductWith(camera.GetVecUp())).Normalize() * (-1) * speed);
           }
           if (windowEvent.key.code == sf::Keyboard::W) {
-            camera.Move(camera.GetVecFront() * speed);
+            camera.Translate(camera.GetVecFront() * speed);
           }
           if (windowEvent.key.code == sf::Keyboard::S) {
-            camera.Move(-camera.GetVecFront() * speed);
+            camera.Translate(camera.GetVecFront() * (-1) * speed);
           }
           if (windowEvent.key.code == sf::Keyboard::D) {
-            camera.Move(glm::normalize(glm::cross(camera.GetVecFront(),camera.GetVecUp())) * speed);
+            camera.Translate((camera.GetVecFront().GetVectorProductWith(camera.GetVecUp())).Normalize() * speed);
           }
-          break;
         default:
           break;
       }

@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "GL/glew.h"
-#include "glm/glm.hpp"
 #include "math.h"
 
 class Shader {
@@ -23,13 +22,15 @@ class Shader {
 
   void use() { glUseProgram(ID); }
 
-  void setMat4(std::string name, const glm::mat4& data) {
+  void setMat4(std::string name, const Mat4& data) const {
     auto location = glGetUniformLocation(ID, name.c_str());
-    glUniformMatrix4fv(location, 1, GL_FALSE, &data[0][0]);
+    auto matrix = Mat4ToGlmMatrix(data);
+    glUniformMatrix4fv(location, 1, GL_FALSE, &matrix[0][0]);
   }
 
-  void setVec3(const std::string& name, const glm::vec3& data) const {
-    glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, &data[0]);
+  void setVec3(const std::string& name, const Vec3& data) const {
+    auto location = glGetUniformLocation(ID, name.c_str());
+    glUniform3fv(location, 1, &Vec3ToGlmVector(data)[0]);
   }
 
   void setVec3(const std::string& name, float x, float y, float z) const {
@@ -140,5 +141,16 @@ class Shader {
     glDeleteShader(FragmentShaderID);
 
     return ProgramID;
+  }
+
+  glm::mat4 Mat4ToGlmMatrix(const Mat4& matrix) const {
+    return {matrix[0][0], matrix[0][1], matrix[0][2], matrix[0][3],
+            matrix[1][0], matrix[1][1], matrix[1][2], matrix[1][3],
+            matrix[2][0], matrix[2][1], matrix[2][2], matrix[2][3],
+            matrix[3][0], matrix[3][1], matrix[3][2], matrix[3][3]};
+  }
+
+  glm::vec3 Vec3ToGlmVector(const Vec3& vector) const {
+    return {vector[0], vector[1], vector[2]};
   }
 };
