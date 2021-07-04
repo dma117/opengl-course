@@ -5,7 +5,7 @@ Camera::Camera() :
 	position_(Vec3(0, 0, 3)), 
 	vec_up_(Vec3(0, 1, 0)), 
 	vec_front_(Vec3(0, 0, -1)), 
-	ratio_(800.f / 600),
+	ratio_(1920.f / 1080),
 	fov_(glm::radians(70.f)), 
 	near_(0.1f), 
 	far_(100.f) {}
